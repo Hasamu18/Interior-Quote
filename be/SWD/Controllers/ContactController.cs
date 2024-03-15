@@ -1,32 +1,51 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using Repositories.Model;
 using Services.Interface;
+using Twilio.Rest.Video.V1.Room.Participant;
+using static Repositories.ModelView.CartView;
 using static Repositories.ModelView.ContactView;
 
 namespace SWD.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class ContactController : Controller
+    public class ContactController : ControllerBase
     {
-        private IContactService _contactService;
+        private readonly IContactService _contactService;
         public ContactController(IContactService contactService)
         {
             _contactService = contactService;
         }
 
-        [AllowAnonymous] 
-        [HttpPost("Add-An-Contact")]
-        public async Task<IActionResult> AddAnContact(AddContactView add)
+        [HttpPost("Add-An-Contact-For-Guest")]
+        public async Task<IActionResult> AddContactForGuest(string interiorId, AddContactView add)
         {
             try
             {
-                var status = await _contactService.AddContact(add);
-                return Ok(new
-                {
-                    Message = status
-                });
+                var status = await _contactService.AddContactForGuest( interiorId, add);
+                if (status.Item1)
+                    return Ok(status.Item2);
+                else return BadRequest(status.Item2);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [Authorize(Roles = "Customer")]
+        [HttpPost("Add-An-Contact-For-Customer")]
+        public async Task<IActionResult> AddContactForCustomer(string interiorId, AddForCustomerContactView add)
+        {
+            try
+            {
+                var id = (HttpContext.User.FindFirst("id")?.Value) ?? "";
+                var status = await _contactService.AddContactForCustomer(id, interiorId, add);
+                if (status.Item1)
+                    return Ok(status.Item2);
+                else return BadRequest(status.Item2);
             }
             catch (Exception ex)
             {
@@ -41,10 +60,9 @@ namespace SWD.Controllers
             try
             {
                 var status = await _contactService.AddressTheContact(address);
-                return Ok(new
-                {
-                    Message = status
-                });
+                if (status.Item1)
+                    return Ok(status.Item2);
+                else return BadRequest(status.Item2);
             }
             catch (Exception ex)
             {
@@ -59,10 +77,9 @@ namespace SWD.Controllers
             try
             {
                 var status = await _contactService.DeleteContact(delete);
-                return Ok(new
-                {
-                    Message = status
-                });
+                if (status.Item1)
+                    return Ok(status.Item2);
+                else return BadRequest(status.Item2);
             }
             catch (Exception ex)
             {
@@ -77,10 +94,7 @@ namespace SWD.Controllers
             try
             {
                 var status = await _contactService.GetPagingContact(paging);
-                return Ok(new
-                {
-                    Message = status
-                });
+                return Ok(status);
             }
             catch (Exception ex)
             {
@@ -95,15 +109,33 @@ namespace SWD.Controllers
             try
             {
                 var status = await _contactService.GetContactDetail(detail);
-                return Ok(new
-                {
-                    Message = status
-                });
+                if (status.Item1)
+                    return Ok(status.Item2);
+                else return BadRequest(status.Item2);
             }
             catch (Exception ex)
             {
                 return BadRequest(ex.Message);
             }
         }
+        [Authorize(Roles ="Staff")]
+        [HttpPost("Staff/Create-Contract-PDF")]
+        public async Task<IActionResult> Test(string staffId, string contactId, AddCartView[] array) 
+        {
+            var status = await _contactService.GenerateContractPdf(staffId, contactId, array);
+            if (status.Item1 == false) return BadRequest("Error");
+            else return Ok(status.Item3);
+        }
+        [Authorize(Roles = "Customer")]
+        [HttpGet("Customer/Get-Customer-Request-List")]
+        public async Task<IActionResult> GetAllRequestCustomer() 
+        {
+            var _id = (HttpContext.User.FindFirst("id")?.Value) ?? "";
+            var status = await _contactService.GetCustomerContactList(_id);
+            if (status.Item1 == false) return BadRequest("Invalid Token || Mail does not exist");
+            else return Ok(status.Item2);
+        }
+
+
     }
 }

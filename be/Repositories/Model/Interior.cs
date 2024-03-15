@@ -13,10 +13,10 @@ namespace Repositories.Model
         [BsonElement] public string? Description { get; set; }
         [BsonElement] public required byte[] Image { get; set; }
         [BsonElement] public required int Quantity { get; set; }
-        [BsonElement] public required double Price { get; set; }
+        [BsonElement] public required int Price { get; set; }
         public enum ClassifyInterior
         {
-            Chair = 1, Desk = 2
+            Chair = 1, Desk = 2, Cabinet = 3, Clock = 4
         }
     }
 }
