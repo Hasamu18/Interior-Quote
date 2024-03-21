@@ -160,14 +160,14 @@ const ListAccount = () => {
                 </span>
                 <br />
                 <span>
-                    <span style={{ fontWeight: "bold", marginTop: "10px;", display: "inline-block" }}>
+                    <span style={{ fontWeight: "bold", marginTop: "10px", display: "inline-block" }}>
                         Phone Number:
                     </span>
                     {record.phoneNumber !== null && (<span>{" " + record.phoneNumber}</span>)}
                 </span>
                 <br />
                 <span>
-                    <span style={{ fontWeight: "bold", marginTop: "10px;", display: "inline-block" }}>
+                    <span style={{ fontWeight: "bold", marginTop: "10px", display: "inline-block" }}>
                         Role:
                     </span>
                     {(index % 2 === 0 || index % 3 === 0) && (<span>{" Staff"}</span>)}
@@ -199,13 +199,8 @@ const ListAccount = () => {
         },
         {
             title: 'Phone Number',
-            dataIndex: 'phoneNumber',
+            dataIndex: 'phone',
             width: '20%',
-        },
-        {
-            title: 'Password',
-            dataIndex: 'password',
-            width: '10%',
         },
         {
             title: 'Role',
@@ -213,7 +208,7 @@ const ListAccount = () => {
             width: '10%',
             render: (text, record, index) => {
                 if (index % 2 === 0 || index % 3 === 0) {
-                    return <span span > Staff</span >;
+                    return <span>Staff</span >;
                 } else {
                     return <span>Customer</span>;
                 }
